@@ -5,15 +5,14 @@ import { generateClient } from "aws-amplify/data";
 const client = generateClient<Schema>();
 
 export default function() {
-
   const [tanks, setTanks] = useState<Schema["Aquarium"]["type"][]>([]);
   const [error, setError] = useState<string | null>(null);
   
   const fetchTanks = async () => {
     try {
-      const { data: items, errors } = await client.models.Aquarium.list(
-        {selectionSet: ['id', 'tank', 'tankType']}
-      );
+      const { data: items, errors } = await client.models.Aquarium.list({
+        selectionSet: ['id', 'tank', 'tankType']
+      });
       
       if (errors) {
         console.error("Errors fetching tanks:", errors);
@@ -21,7 +20,6 @@ export default function() {
         return;
       }
       
-      // Filter out any items that might cause rendering issues
       const validItems = items.filter(item => item && item.id);
       setTanks(validItems);
     } catch (err) {
@@ -29,7 +27,7 @@ export default function() {
       setError("An error occurred while fetching tanks.");
     }
   };
-
+  
   useEffect(() => {
     fetchTanks();
   }, []);
@@ -40,7 +38,9 @@ export default function() {
 
   return (
     <div>
-      <h2>Tank List</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2>Tank List</h2>
+      </div>
       <div className="min-w-100">
         <table className="table-auto w-full border-separate border-spacing-3">
           <thead>
@@ -61,7 +61,7 @@ export default function() {
               ))
             ) : (
               <tr>
-                <td colSpan={4}>No tanks found</td>
+                <td colSpan={3}>No tanks found</td>
               </tr>
             )}
           </tbody>
