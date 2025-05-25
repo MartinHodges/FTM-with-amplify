@@ -1,31 +1,29 @@
 import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
 
-// Define the enum values for validation and TypeScript type safety
-const TANK_TYPES = ['Freshwater', 'Saltwater', 'Tropical', 'Arctic'] as const;
-type TankTypeValue = typeof TANK_TYPES[number];
+const TankTypeValues = ['Freshwater', 'Saltwater', 'Tropical', 'Arctic'] as const;
+type TankType = (typeof TankTypeValues)[number];
 
 const schema = a.schema({
   Aquarium: a.model({
-      id: a.id().required(),
       tank: a.string().required(),
-      // Store as string but validate against allowed values
       tankType: a.string()
         .required()
         .validate(value => {
-          const stringValue = String(value);
-          TANK_TYPES.includes(stringValue as TankTypeValue) 
-            ? { valid: true } 
-            : { valid: false, message: `tankType must be one of: ${TANK_TYPES.join(', ')}` }
-        }),
-      fish: a.string(),
-      createdAt: a.datetime(),
-      updatedAt: a.datetime()
+          const stringValue: string = String(value)
+          return TankTypeValues.includes(stringValue as TankType)
+            ? { valid: true }
+            : { valid: false, message: `tankType must be one of: ${TankTypeValues.join(', ')}` }
+        }),      
+        fish: a.string(),
     })
-    .identifier(['id', 'tankType'])  // Now works because tankType is a string
+    // .identifier(['id', 'tankType']) // as id is autogenerates, this primary key cannot be created
     .authorization(allow => [allow.authenticated()])
+    .secondaryIndexes((index) => [
+      index('tankType').sortKeys(['tank']) // tankType is the Partition Key - note that the GSI cannot be named but is referred to its index position
+    ])
 });
 
-export type Schema = ClientSchema<typeof schema>;
+export type Schema = ClientSchema<typeof schema>
 
 export const data = defineData({
   schema,

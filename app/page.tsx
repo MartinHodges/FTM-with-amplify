@@ -1,14 +1,14 @@
 'use client'
 
-import { Button, useAuthenticator } from '@aws-amplify/ui-react';
-import { fetchUserAttributes, getCurrentUser } from "@aws-amplify/auth";
+import { Button, Flex, useAuthenticator } from '@aws-amplify/ui-react';
+import { fetchUserAttributes, FetchUserAttributesOutput, getCurrentUser, GetCurrentUserOutput } from "@aws-amplify/auth";
 import { useEffect, useState } from "react";
-import TankList from './components/TankList';
+import ShowAquarium from './components/ShowAquarium';
 
 export default function Home() {
 
-  const [user, setUser] = useState<any | null>(null);
-  const [attributes, setAttributes] = useState<any | null>(null);
+  const [user, setUser] = useState<GetCurrentUserOutput | null>(null);
+  const [attributes, setAttributes] = useState<FetchUserAttributesOutput | null>(null);
   const { signOut } = useAuthenticator();
 
   useEffect(() => {
@@ -28,15 +28,15 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="flex items-center">
-          <Button onClick={signOut}>Logout</Button>
-          <p className='ml-2'>Hello {attributes?.given_name} ({user?.signInDetails?.loginId})</p>
-        </div>
-        <p>My Aquarium Fish Tank Manager</p>
-        <TankList />
-      </main>
-    </div>
+    <main className="p-8 font-[family-name:var(--font-geist-sans)]">
+      <Flex direction="row" justifyContent="space-between" alignItems="center" width="100%">
+        <h1>My Aquarium Fish Tank Manager</h1>
+        <Flex style={{alignContent: 'center'}}>
+          <p className='ml-2'>{attributes?.given_name} ({user?.signInDetails?.loginId})</p>
+          <Button onClick={signOut} style={{height: '30px'}}>Logout</Button>
+        </Flex>
+      </Flex>
+      <ShowAquarium />
+    </main>
   );
 }
